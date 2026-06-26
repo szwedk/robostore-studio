@@ -59,11 +59,9 @@ jobs:
       - name: Vendor offline camera assets
         run: ./scripts/fetch-camera-assets.sh
 
-      - name: UI deps + icons
+      - name: UI deps
         working-directory: app
-        run: |
-          npm ci
-          npm run icons
+        run: npm ci   # icons are committed under src-tauri/icons/ (regenerate with `npm run icons`)
 
       - name: Build app (unsigned)
         uses: tauri-apps/tauri-action@v0
