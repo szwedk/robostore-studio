@@ -67,7 +67,7 @@ jobs:
         working-directory: app
         run: npm ci   # icons are committed under src-tauri/icons/ (regenerate with `npm run icons`)
 
-      - name: Build app (unsigned)
+      - name: Build app (signed if Apple secrets present, else ad-hoc)
         uses: tauri-apps/tauri-action@v0
         with:
           projectPath: app
@@ -94,3 +94,13 @@ jobs:
             Everything is bundled — no Python, terminal, or extra installs.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # macOS code-signing + notarization. Add these repo secrets (Settings →
+          # Secrets → Actions) to ship a signed/notarized app with NO Gatekeeper
+          # warning. If unset, the build is ad-hoc (still works, but users must
+          # right-click → Open / xattr). Requires an Apple Developer account.
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
