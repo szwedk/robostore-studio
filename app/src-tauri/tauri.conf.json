@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "RoboStore Studio",
+  "version": "0.1.0",
+  "identifier": "com.robostore.studio",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "RoboStore Studio",
+        "width": 1280,
+        "height": 832,
+        "minWidth": 1040,
+        "minHeight": 680,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "decorations": true,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' ws://127.0.0.1:8765 http://127.0.0.1:8765; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["dmg", "appimage", "deb"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/icon.icns",
+      "icons/icon.png"
+    ],
+    "externalBin": ["binaries/studio-engine"],
+    "category": "DeveloperTool",
+    "shortDescription": "Control, learn, and develop with your BrainCo Revo2 hand.",
+    "copyright": "© RoboStore"
+  },
+  "plugins": {}
+}

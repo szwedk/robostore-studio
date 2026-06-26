@@ -1,0 +1,78 @@
+name: Build RoboStore Studio
+
+# Builds installers for macOS (Apple Silicon + Intel) and Linux and attaches them
+# to a draft GitHub Release. Tag a version (e.g. v0.1.0) or run manually.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14      # Apple Silicon
+            triple: aarch64-apple-darwin
+          - os: macos-13      # Intel
+            triple: x86_64-apple-darwin
+          - os: ubuntu-22.04
+            triple: x86_64-unknown-linux-gnu
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.triple }}
+
+      - name: System deps (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: brew install libusb
+
+      - name: System deps (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libusb-1.0-0-dev libwebkit2gtk-4.1-dev \
+            build-essential curl wget file libxdo-dev libssl-dev \
+            libayatana-appindicator3-dev librsvg2-dev
+
+      - name: Engine deps + freeze sidecar
+        run: |
+          python -m pip install --upgrade pip
+          pip install aiohttp pyserial "bc-stark-sdk==1.4.2" pyinstaller
+          PYTHON=python ./scripts/build-sidecar.sh
+
+      - name: Vendor offline camera assets
+        run: ./scripts/fetch-camera-assets.sh
+
+      - name: UI deps + icons
+        working-directory: app
+        run: |
+          npm ci
+          npm run icons
+
+      - name: Build app (unsigned)
+        uses: tauri-apps/tauri-action@v0
+        with:
+          projectPath: app
+          args: --target ${{ matrix.triple }}
+          tagName: ${{ github.ref_type == 'tag' && github.ref_name || 'studio-dev' }}
+          releaseName: "RoboStore Studio ${{ github.ref_name }}"
+          releaseDraft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

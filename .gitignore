@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.env
+
+# Studio runtime
+studio_config.json
+
+# Node / Vite
+app/node_modules
+app/dist
+
+# Tauri
+app/src-tauri/target
+app/src-tauri/gen
+app/src-tauri/binaries/
+
+# Frozen sidecar build
+build/
+
+# Downloaded MediaPipe assets (run scripts/fetch-camera-assets.sh)
+app/public/mediapipe/
+app/public/models/
+
+# OS / editor
+.DS_Store
+.claude/

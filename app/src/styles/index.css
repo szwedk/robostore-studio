@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Design tokens. Values are space-separated RGB triplets so Tailwind can apply
+   alpha (e.g. border-line/10). Swap these to re-skin the entire product.
+   ───────────────────────────────────────────────────────────────────────── */
+:root,
+.dark {
+  --bg: 9 12 16;
+  --bg-elev: 14 18 24;
+  --surface: 20 25 32;
+  --surface-2: 27 33 41;
+  --surface-3: 37 46 56;
+  --line: 150 172 186;
+  --line-strong: 168 190 204;
+  --text: 240 244 248;
+  --text-dim: 150 167 179;
+  --text-faint: 99 116 128;
+  --accent: 92 182 196;
+  --accent-soft: 92 182 196;
+  --accent-ink: 5 17 21;
+  --amber: 226 164 78;
+  --green: 52 199 130;
+  --red: 244 90 112;
+}
+
+.light {
+  --bg: 243 245 247;
+  --bg-elev: 255 255 255;
+  --surface: 255 255 255;
+  --surface-2: 248 250 251;
+  --surface-3: 238 242 245;
+  --line: 18 30 40;
+  --line-strong: 18 30 40;
+  --text: 16 23 31;
+  --text-dim: 86 102 114;
+  --text-faint: 138 152 163;
+  --accent: 50 128 140;
+  --accent-soft: 88 164 176;
+  --accent-ink: 255 255 255;
+  --amber: 176 118 32;
+  --green: 21 158 96;
+  --red: 208 48 74;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: rgb(var(--bg));
+  color: rgb(var(--text));
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter",
+    system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  /* faint top-lit ambient wash so flat dark surfaces read as premium glass */
+  background-image: radial-gradient(
+    120% 80% at 50% -10%,
+    rgb(var(--accent) / 0.06),
+    transparent 60%
+  );
+}
+
+::selection {
+  background: rgb(var(--accent) / 0.3);
+}
+
+/* Quiet, native-feeling scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--line) / 0.18);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--line) / 0.3);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+button {
+  font: inherit;
+}
+
+@layer components {
+  .glass {
+    background: rgb(var(--bg-elev) / 0.72);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+  }
+  .card {
+    @apply rounded-2xl bg-surface border border-line/10 shadow-card;
+  }
+  .hairline {
+    @apply border-line/10;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .focus-ring {
+    @apply outline-none ring-0 focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-0;
+  }
+  /* drag region for the frameless Tauri titlebar */
+  .drag {
+    -webkit-app-region: drag;
+  }
+  .no-drag {
+    -webkit-app-region: no-drag;
+  }
+}
+
+/* Apple-style range slider, accent fill up to the thumb */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    rgb(var(--accent)) 0%,
+    rgb(var(--accent)) var(--pct, 0%),
+    rgb(var(--surface-3)) var(--pct, 0%),
+    rgb(var(--surface-3)) 100%
+  );
+  outline: none;
+  cursor: pointer;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 0;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.35), 0 0 0 1px rgb(0 0 0 / 0.04);
+  transition: transform 0.12s ease;
+}
+.slider::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+}
+.slider::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 0;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+}

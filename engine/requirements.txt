@@ -1,0 +1,11 @@
+# RoboStore Studio engine
+aiohttp>=3.9
+pyserial>=3.5
+bc-stark-sdk==1.4.2   # BrainCo Stark SDK (PyPI; abi3 wheels for macOS + Linux)
+#
+# NATIVE PREREQUISITE: bc_stark_sdk's native lib needs libusb at runtime.
+#   macOS:  brew install libusb
+#   Linux:  sudo apt install libusb-1.0-0
+# Without it, the SDK import fails and only the Simulator works.
+#
+# Camera tracking runs in-browser (MediaPipe) — no Python CV deps required.
