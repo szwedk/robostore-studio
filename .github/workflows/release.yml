@@ -76,5 +76,21 @@ jobs:
           releaseName: "RoboStore Studio ${{ github.ref_name }}"
           releaseDraft: true
           prerelease: false
+          releaseBody: |
+            **RoboStore Studio** — control, learn, and develop with your BrainCo Revo2 hand.
+
+            ### Download
+            - **macOS — Apple Silicon:** `*_aarch64.dmg`
+            - **macOS — Intel:** `*_x64.dmg`
+            - **Linux:** `*.AppImage` (portable) or `*.deb`
+
+            ### Install (macOS)
+            1. Open the `.dmg`, drag **RoboStore Studio** to Applications.
+            2. First launch: **right-click the app → Open** (it's unsigned for now).
+               If it says *"damaged"*, run once: `xattr -cr "/Applications/RoboStore Studio.app"`
+            3. It starts in **Simulator**. Plug the hand into USB → pick it from the
+               device menu (top-right). Enter your license code when prompted.
+
+            Everything is bundled — no Python, terminal, or extra installs.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
