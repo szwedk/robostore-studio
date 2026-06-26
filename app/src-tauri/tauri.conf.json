@@ -41,7 +41,6 @@
     "shortDescription": "Control, learn, and develop with your BrainCo Revo2 hand.",
     "copyright": "© RoboStore",
     "macOS": {
-      "entitlements": "Entitlements.plist",
       "minimumSystemVersion": "10.15"
     }
   },
