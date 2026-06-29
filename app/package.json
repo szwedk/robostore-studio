@@ -1,7 +1,7 @@
 {
   "name": "robostore-studio",
   "private": true,
-  "version": "0.1.8",
+  "version": "0.1.9",
   "type": "module",
   "description": "RoboStore Studio — control, learn, and develop with your BrainCo Revo2 hand.",
   "scripts": {

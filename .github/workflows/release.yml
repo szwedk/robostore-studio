@@ -117,8 +117,13 @@ jobs:
         continue-on-error: true
         run: |
           npm i -g appdmg
-          APP=$(find app/src-tauri/target -type d -path "*/bundle/macos/*.app" 2>/dev/null | head -1)
-          if [ -z "$APP" ]; then echo "no .app found, skipping"; ls -R app/src-tauri/target/*/release/bundle 2>/dev/null | head; exit 0; fi
+          # Search the whole tree (target dir location varies) for the bundled app.
+          APP=$(find . -type d -path "*/release/bundle/macos/*.app" -not -path "*/node_modules/*" 2>/dev/null | head -1)
+          if [ -z "$APP" ]; then
+            echo "no .app found, skipping. dmg/macos dirs present:"
+            find . -path "*/release/bundle/*" -not -path "*/node_modules/*" -maxdepth 8 2>/dev/null | head -20
+            exit 0
+          fi
           echo "found app: $APP"
           WORK=$(mktemp -d)
           cp -R "$APP" "$WORK/"
