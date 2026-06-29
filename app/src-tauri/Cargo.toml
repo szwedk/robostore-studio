@@ -1,6 +1,6 @@
 [package]
 name = "robostore-studio"
-version = "0.1.7"
+version = "0.1.8"
 description = "RoboStore Studio — control, learn, and develop with your hand."
 authors = ["RoboStore"]
 edition = "2021"

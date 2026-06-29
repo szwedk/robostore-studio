@@ -117,8 +117,9 @@ jobs:
         continue-on-error: true
         run: |
           npm i -g appdmg
-          APP="app/src-tauri/target/${{ matrix.triple }}/release/bundle/macos/RoboStore Studio.app"
-          if [ ! -d "$APP" ]; then echo "no .app, skipping"; exit 0; fi
+          APP=$(find app/src-tauri/target -type d -path "*/bundle/macos/*.app" 2>/dev/null | head -1)
+          if [ -z "$APP" ]; then echo "no .app found, skipping"; ls -R app/src-tauri/target/*/release/bundle 2>/dev/null | head; exit 0; fi
+          echo "found app: $APP"
           WORK=$(mktemp -d)
           cp -R "$APP" "$WORK/"
           cp "dmg-extras/Open RoboStore Studio.command" "$WORK/"
