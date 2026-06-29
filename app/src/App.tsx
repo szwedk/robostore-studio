@@ -7,8 +7,13 @@ import { TopBar } from "@/components/TopBar";
 import { Activate } from "@/screens/Activate";
 import { Setup } from "@/screens/Setup";
 import { Control } from "@/screens/Control";
+import { GraspLab } from "@/screens/GraspLab";
 import { Camera } from "@/screens/Camera";
+import { Guardian } from "@/screens/Guardian";
+import { Arcade } from "@/screens/Arcade";
 import { Learn } from "@/screens/Learn";
+import { Scope } from "@/screens/Scope";
+import { Reflexes } from "@/screens/Reflexes";
 import { Develop } from "@/screens/Develop";
 
 export default function App() {
@@ -54,8 +59,13 @@ export default function App() {
           className="min-h-0 flex-1"
         >
           {screen === "control" && <Control />}
+          {screen === "grasp" && <GraspLab />}
           {screen === "camera" && <Camera />}
+          {screen === "guardian" && <Guardian />}
+          {screen === "arcade" && <Arcade />}
           {screen === "learn" && <Learn />}
+          {screen === "scope" && <Scope />}
+          {screen === "reflexes" && <Reflexes />}
           {screen === "develop" && <Develop />}
         </motion.div>
       </main>

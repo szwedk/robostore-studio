@@ -12,8 +12,21 @@ import type {
   TouchSample,
 } from "./protocol";
 
-export type Screen = "setup" | "control" | "camera" | "learn" | "develop";
+export type Screen =
+  | "setup"
+  | "control"
+  | "grasp"
+  | "camera"
+  | "guardian"
+  | "arcade"
+  | "learn"
+  | "scope"
+  | "reflexes"
+  | "develop";
 export type Theme = "dark" | "light";
+
+/** Generic outbound message — lets feature screens send their own command types. */
+export type AnyMessage = { type: string } & Record<string, unknown>;
 
 interface AppState {
   // link to engine process
@@ -31,6 +44,8 @@ interface AppState {
   touch: TouchSample[];
   deviceInfo: string;
   hz: number;
+  /** Live per-feature status from the engine (grasp/guardian/reflexes). */
+  features: Record<string, any>;
 
   ports: string[];
   currentPort: string;
@@ -51,6 +66,8 @@ interface AppState {
 
   setFinger: (index: number, value: number) => void;
   setPositions: (positions: number[]) => void;
+  /** Send any command to the engine (used by feature screens). */
+  send: (msg: AnyMessage) => void;
   sendPose: (name: string) => void;
   runDemo: () => void;
   useSimulator: (enabled: boolean) => void;
@@ -105,6 +122,7 @@ export const useStore = create<AppState>((set, get) => {
             positions: msg.positions,
             targets: msg.targets,
             touch: msg.touch,
+            features: (msg as any).features ?? get().features,
             connected: msg.connected,
             simulated: msg.simulated,
             deviceInfo: msg.device_info,
@@ -146,6 +164,7 @@ export const useStore = create<AppState>((set, get) => {
     positions: [0, 0, 0, 0, 0, 0],
     targets: [0, 0, 0, 0, 0, 0],
     touch: [],
+    features: {},
     deviceInfo: "",
     hz: 0,
 
@@ -179,6 +198,7 @@ export const useStore = create<AppState>((set, get) => {
       set({ targets: positions });
       engine.send({ type: "set_positions", positions });
     },
+    send: (msg) => engine.send(msg as never),
     sendPose: (name) => engine.send({ type: "pose", name }),
     runDemo: () => engine.send({ type: "demo" }),
     useSimulator: (enabled) => {

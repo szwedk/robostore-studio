@@ -5,16 +5,26 @@ import { DeviceMenu } from "@/components/DeviceMenu";
 const TITLES: Record<Screen, string> = {
   setup: "Setup",
   control: "Control",
+  grasp: "Grasp Lab",
   camera: "Camera",
+  guardian: "Guardian",
+  arcade: "Arcade",
   learn: "Learn",
+  scope: "Scope",
+  reflexes: "Reflexes",
   develop: "Develop",
 };
 
 const SUBTITLES: Record<Screen, string> = {
   setup: "",
   control: "Pose, sense, and move your hand in real time",
+  grasp: "Close the loop — grip by force and feel, not by guess",
   camera: "Mirror, record, and train gestures with your camera",
+  guardian: "Safety limits, force ceiling, and emergency stop",
+  arcade: "Play and train — games and scored drills",
   learn: "Step-by-step from first grasp to your first script",
+  scope: "A live oscilloscope for every signal on the hand",
+  reflexes: "Background if-this-then-that rules for the hand",
   develop: "Scripting, data, classifiers, and the local API",
 };
 

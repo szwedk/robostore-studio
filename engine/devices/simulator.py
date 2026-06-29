@@ -52,7 +52,8 @@ class SimulatedHand(HandDevice):
         state.firmware = "sim"
         state.port = "simulator"
         state.positions = [round(p, 1) for p in self._pos]
-        state.targets = [round(p, 1) for p in self._target]
+        # Note: state.targets is owned by the engine (user intent → command pipeline);
+        # the device must not overwrite it.
 
         # Synthesize touch: a flexed fingertip "presses" → proximity + force rise,
         # with a gentle breathing wobble so the UI feels alive.

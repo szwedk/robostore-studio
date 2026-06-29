@@ -30,6 +30,9 @@ from .protocol import (
 from .devices.base import HandDevice
 from .devices.simulator import SimulatedHand
 from .devices import revo2 as revo2mod
+from .features.reflexes import ReflexEngine
+from .features.grasp import GraspController
+from .features.guardian import GuardianClamp
 
 logging.getLogger("bc_stark_sdk").setLevel(logging.CRITICAL)
 
@@ -63,6 +66,26 @@ class Engine:
         self._retry_after = 0.0
         self._want_device = True  # the engine should keep a link alive
         self._switching = False   # True while a user-initiated device switch is in flight
+        # Command pipeline: user target → reflexes → grasp → guardian(clamp last) → device.
+        self.features: list[tuple[str, Any]] = [
+            ("reflexes", ReflexEngine()),
+            ("grasp", GraspController()),
+            ("guardian", GuardianClamp()),
+        ]
+
+    def _pipeline(self, targets: list[int]) -> list[int]:
+        out = clamp_positions(targets)
+        for _, feat in self.features:
+            try:
+                out = feat.step(self.state, out)
+            except Exception:
+                pass
+        return clamp_positions(out)
+
+    def _frame(self) -> dict[str, Any]:
+        f = self.state.frame()
+        f["features"] = {name: feat.status() for name, feat in self.features}
+        return f
 
     # ── lifecycle ─────────────────────────────────────────────────────────
     async def _make_device(self) -> HandDevice:
@@ -96,11 +119,16 @@ class Engine:
 
             self._switching = False
             await self._broadcast_status("connected", self.device.name)
-            # stream until the link drops
+            # stream until the link drops; each frame run the command pipeline
+            last_sent: list[int] | None = None
             while self.device and self.device.connected and self._want_device:
                 await self.device.read(self.state)
+                outgoing = self._pipeline([int(round(t)) for t in self.state.targets])
+                if outgoing != last_sent:
+                    await self.device.move(outgoing)
+                    last_sent = outgoing
                 self.state.ts = round(time.time() * 1000)
-                await self._broadcast(self.state.frame())
+                await self._broadcast(self._frame())
                 await asyncio.sleep(0.033)  # ~30 Hz
 
             if self.device:
@@ -172,11 +200,11 @@ class Engine:
             return
         t = cmd.get("type")
 
+        # set_positions/set_finger/pose update the user TARGET; the 30 Hz pipeline
+        # sends it to the device. Manual commands release an active grasp.
         if t == "set_positions":
-            pos = clamp_positions(cmd.get("positions", []))
-            self.state.targets = [float(p) for p in pos]
-            if self.device:
-                await self.device.move(pos)
+            self.state.targets = [float(p) for p in clamp_positions(cmd.get("positions", []))]
+            self._manual_override()
 
         elif t == "set_finger":
             i = int(cmd.get("index", -1))
@@ -184,16 +212,13 @@ class Engine:
                 pos = clamp_positions(self.state.targets)
                 pos[i] = max(POS_MIN, min(POS_MAX, int(cmd.get("value", 0))))
                 self.state.targets = [float(p) for p in pos]
-                if self.device:
-                    await self.device.move(pos)
+                self._manual_override()
 
         elif t == "pose":
             pose = POSES.get(cmd.get("name", ""))
             if pose:
-                pos = clamp_positions(pose["positions"])
-                self.state.targets = [float(p) for p in pos]
-                if self.device:
-                    await self.device.move(pos)
+                self.state.targets = [float(p) for p in clamp_positions(pose["positions"])]
+                self._manual_override()
 
         elif t == "demo":
             asyncio.create_task(self._run_demo())
@@ -225,14 +250,24 @@ class Engine:
         elif t == "reconnect":
             await self._reset_link()
 
+        else:
+            # delegate to feature processors (grasp / guardian / reflexes)
+            for _, feat in self.features:
+                if feat.on_command(cmd):
+                    break
+
+    def _manual_override(self) -> None:
+        """A manual position command wins over an active closed-loop grasp."""
+        for name, feat in self.features:
+            if name == "grasp" and getattr(feat, "armed", False):
+                feat.armed = False
+
     async def _run_demo(self) -> None:
         sequence = ["open", "fist", "point", "peace", "pinch", "ok", "open"]
         for name in sequence:
             pose = POSES.get(name)
-            if pose and self.device:
-                pos = clamp_positions(pose["positions"])
-                self.state.targets = [float(p) for p in pos]
-                await self.device.move(pos)
+            if pose:
+                self.state.targets = [float(p) for p in clamp_positions(pose["positions"])]
             await asyncio.sleep(1.1)
 
 
@@ -245,7 +280,7 @@ def build_app(engine: Engine, static_dir: pathlib.Path | None) -> web.Applicatio
         await ws.prepare(request)
         engine.clients.add(ws)
         await ws.send_str(json.dumps(engine.hello()))
-        await ws.send_str(json.dumps(engine.state.frame()))
+        await ws.send_str(json.dumps(engine._frame()))
         try:
             async for msg in ws:
                 if msg.type == web.WSMsgType.TEXT:

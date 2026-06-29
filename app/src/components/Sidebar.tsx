@@ -1,8 +1,13 @@
 import { motion } from "framer-motion";
 import {
   Hand,
+  Grab,
   Camera,
+  ShieldCheck,
+  Gamepad2,
   GraduationCap,
+  Activity,
+  Zap,
   Code2,
   Settings2,
   type LucideIcon,
@@ -21,8 +26,13 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { key: "control", label: "Control", icon: Hand },
+  { key: "grasp", label: "Grasp Lab", icon: Grab },
   { key: "camera", label: "Camera", icon: Camera },
+  { key: "guardian", label: "Guardian", icon: ShieldCheck },
+  { key: "arcade", label: "Arcade", icon: Gamepad2 },
   { key: "learn", label: "Learn", icon: GraduationCap },
+  { key: "scope", label: "Scope", icon: Activity, dev: true },
+  { key: "reflexes", label: "Reflexes", icon: Zap, dev: true },
   { key: "develop", label: "Develop", icon: Code2, dev: true },
 ];
 

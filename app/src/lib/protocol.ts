@@ -47,6 +47,8 @@ export interface StateFrame {
   targets: number[];
   touch: TouchSample[];
   ts: number;
+  /** Per-feature live status (grasp/guardian/reflexes), keyed by feature name. */
+  features?: Record<string, unknown>;
 }
 
 export interface HelloFrame {
