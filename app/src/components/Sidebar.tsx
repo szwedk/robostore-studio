@@ -10,6 +10,7 @@ import {
 import { useStore, type Screen } from "@/lib/store";
 import { brand } from "@/brand.config";
 import { cn } from "@/lib/cn";
+import logoUrl from "@/assets/logo.png";
 
 interface NavItem {
   key: Screen;
@@ -32,9 +33,11 @@ export function Sidebar() {
     <aside className="flex w-[232px] flex-col border-r border-line/10 bg-bg-elev/40">
       {/* brand lockup */}
       <div className="drag flex items-center gap-3 px-5 pb-4 pt-[34px]">
-        <div className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-accent-ink shadow-[0_4px_14px_-4px_rgb(var(--accent)/0.7)]">
-          <Hand size={18} strokeWidth={2.4} />
-        </div>
+        <img
+          src={logoUrl}
+          alt={`${brand.maker} logo`}
+          className="h-9 w-9 rounded-xl shadow-[0_4px_14px_-4px_rgb(var(--accent)/0.7)]"
+        />
         <div className="leading-tight">
           <div className="text-[15px] font-semibold tracking-[-0.01em]">{brand.maker}</div>
           <div className="text-[11px] font-medium uppercase tracking-[0.14em] text-text-faint">
