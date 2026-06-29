@@ -1,0 +1,20 @@
+RoboStore Studio — opening it the first time on macOS
+======================================================
+
+The app isn't code-signed yet, so macOS asks you to confirm it once.
+
+EASIEST (one click)
+  1. Drag "RoboStore Studio" onto the Applications folder.
+  2. Double-click  "Open RoboStore Studio.command"  in this window.
+     (It clears the flag and opens the app for you.)
+
+OR DO IT MANUALLY
+  1. Drag the app to Applications.
+  2. Right-click the app -> Open  (then click Open in the dialog).
+  3. If macOS says the app is "damaged", open Terminal and paste:
+
+     xattr -cr "/Applications/RoboStore Studio.app"
+
+     ...then open the app again.
+
+You only do this once. It goes away when the app is code-signed + notarized.

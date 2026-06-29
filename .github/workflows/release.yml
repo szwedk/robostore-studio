@@ -107,3 +107,25 @@ jobs:
           # APPLE_ID: ${{ secrets.APPLE_ID }}
           # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      # Add a one-click first-run helper + Read Me into the .dmg, then re-upload.
+      # Best-effort: never fails the release.
+      - name: Add first-run helper to DMG (macOS)
+        if: startsWith(matrix.os, 'macos') && github.ref_type == 'tag'
+        continue-on-error: true
+        run: |
+          DMG=$(ls "app/src-tauri/target/${{ matrix.triple }}/release/bundle/dmg/"*.dmg 2>/dev/null | head -1)
+          if [ -z "$DMG" ]; then echo "no dmg found, skipping"; exit 0; fi
+          echo "Injecting helper into $DMG"
+          hdiutil convert "$DMG" -format UDRW -o /tmp/rw.dmg
+          MNT=$(mktemp -d)
+          hdiutil attach /tmp/rw.dmg -nobrowse -mountpoint "$MNT"
+          cp "dmg-extras/Open RoboStore Studio.command" "$MNT/"
+          chmod +x "$MNT/Open RoboStore Studio.command"
+          cp "dmg-extras/Read Me.txt" "$MNT/"
+          hdiutil detach "$MNT"
+          rm -f "$DMG"
+          hdiutil convert /tmp/rw.dmg -format UDZO -o "$DMG"
+          gh release upload "${{ github.ref_name }}" "$DMG" --clobber -R "${{ github.repository }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
