@@ -1,0 +1,12 @@
+{
+  "title": "RoboStore Studio",
+  "background": "background.png",
+  "icon-size": 96,
+  "window": { "size": { "width": 640, "height": 520 } },
+  "contents": [
+    { "x": 150, "y": 210, "type": "file", "path": "RoboStore Studio.app" },
+    { "x": 490, "y": 210, "type": "link", "path": "/Applications" },
+    { "x": 195, "y": 440, "type": "file", "path": "Open RoboStore Studio.command" },
+    { "x": 445, "y": 440, "type": "file", "path": "Read Me.txt" }
+  ]
+}

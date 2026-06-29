@@ -141,7 +141,7 @@ function Connect({
           {ports.map((p) => (
             <button
               key={p}
-              onClick={() => onPort(p)}
+              onClick={() => { onPort(p); onNext(); }}
               className="flex items-center gap-3 rounded-xl border border-line/10 bg-surface-2 px-4 py-3 text-left transition-colors hover:border-accent/40"
             >
               <Usb size={17} className="text-accent" />
@@ -153,42 +153,30 @@ function Connect({
       </div>
 
       <button
-        onClick={onSim}
-        className={cn(
-          "mt-3 flex items-center gap-3 rounded-2xl border px-4 py-3.5 text-left transition-colors",
-          simulated ? "border-amber/40 bg-amber/10" : "border-line/10 bg-surface-2 hover:border-line/20",
-        )}
+        onClick={() => { onSim(); onNext(); }}
+        className="mt-3 flex w-full items-center gap-3 rounded-2xl border border-accent/40 bg-accent/10 px-4 py-3.5 text-left transition-colors hover:bg-accent/15"
       >
-        <Cpu size={18} className={simulated ? "text-amber" : "text-text-dim"} />
+        <Cpu size={18} className="text-accent" />
         <div className="flex-1">
           <div className="text-[14px] font-medium">Continue in Simulator</div>
           <div className="text-[12px] text-text-faint">
             A virtual hand — try every feature without hardware.
           </div>
         </div>
-        {simulated && <Check size={18} className="text-amber" />}
+        <ArrowRight size={16} className="text-accent" />
       </button>
 
       <div className="mt-6 flex items-center gap-3">
         <div className="flex items-center gap-2 text-[13px]">
-          <span
-            className={cn(
-              "h-2 w-2 rounded-full",
-              ready ? "bg-green" : "bg-surface-3",
-            )}
-          />
+          <span className={cn("h-2 w-2 rounded-full", ready ? "bg-green" : "bg-surface-3")} />
           <span className="text-text-dim">
-            {connected ? (simulated ? "Simulator ready" : "Hand connected") : "Not connected"}
+            {connected ? (simulated ? "Simulator ready" : "Hand connected") : "Connecting…"}
           </span>
         </div>
-        <Button
-          size="md"
-          variant="primary"
-          className="ml-auto"
-          disabled={!ready}
-          onClick={onNext}
-        >
-          Continue <ArrowRight size={16} />
+        {/* Always-available exit so onboarding can never trap the user, even
+            before the engine has finished starting. */}
+        <Button size="md" variant="ghost" className="ml-auto" onClick={onNext}>
+          Skip for now <ArrowRight size={16} />
         </Button>
       </div>
     </div>

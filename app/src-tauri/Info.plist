@@ -5,5 +5,7 @@
   <!-- Shown in the macOS camera-permission prompt the first time the camera is used. -->
   <key>NSCameraUsageDescription</key>
   <string>RoboStore Studio uses your camera to mirror your hand onto the device.</string>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>RoboStore Studio does not record audio; this is only required by the camera permission system.</string>
 </dict>
 </plist>

@@ -205,9 +205,17 @@ function StageOverlay({
           <>
             <ShieldAlert size={30} className="mb-3 text-amber" />
             <p className="text-[14px] font-medium">Camera access blocked</p>
-            <p className="mt-1 text-[13px] text-text-faint">
-              Allow camera access in your system settings, then start again.
+            <p className="mt-1 text-[13px] leading-relaxed text-text-faint">
+              Enable it in <span className="text-text-dim">System Settings → Privacy &amp; Security
+              → Camera → RoboStore Studio</span>, then click Try again.
             </p>
+            <p className="mt-2 text-[12px] text-text-faint">
+              If RoboStore Studio isn’t listed (e.g. you tried an earlier build), reset its
+              permission once in Terminal, then reopen the app:
+            </p>
+            <code className="mt-2 select-all rounded-md bg-bg/70 px-2.5 py-1.5 font-mono text-[11px] text-text-dim">
+              tccutil reset Camera com.robostore.studio
+            </code>
           </>
         ) : status === "error" ? (
           <>

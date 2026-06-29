@@ -108,14 +108,31 @@ jobs:
           # APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           # APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
-      # Attach the one-click first-run helper to the release (for the rare case the
-      # ad-hoc-signed app is still blocked). Reliable: just uploads a file.
-      - name: Attach first-run helper to release
-        if: matrix.triple == 'aarch64-apple-darwin' && github.ref_type == 'tag'
+      # Repackage the macOS .dmg with appdmg so the first-run helper + Read Me sit
+      # at fixed, tidy positions (Tauri can't position extra DMG icons). appdmg
+      # writes the .DS_Store deterministically — no flaky Finder scripting.
+      # Best-effort: if it fails, Tauri's clean app→Applications .dmg ships instead.
+      - name: Repackage DMG with helper files (appdmg)
+        if: startsWith(matrix.os, 'macos') && github.ref_type == 'tag'
         continue-on-error: true
         run: |
+          npm i -g appdmg
+          APP="app/src-tauri/target/${{ matrix.triple }}/release/bundle/macos/RoboStore Studio.app"
+          if [ ! -d "$APP" ]; then echo "no .app, skipping"; exit 0; fi
+          WORK=$(mktemp -d)
+          cp -R "$APP" "$WORK/"
+          cp "dmg-extras/Open RoboStore Studio.command" "$WORK/"
+          cp "dmg-extras/Read Me.txt" "$WORK/"
+          cp "dmg-extras/dmg-background.png" "$WORK/background.png"
+          cp "dmg-extras/appdmg-spec.json" "$WORK/spec.json"
+          VER=$(node -p "require('./app/package.json').version")
+          ARCH=$([ "${{ matrix.triple }}" = "aarch64-apple-darwin" ] && echo aarch64 || echo x64)
+          OUT="RoboStore Studio_${VER}_${ARCH}.dmg"
+          ( cd "$WORK" && appdmg spec.json "$OUT" )
+          gh release upload "${{ github.ref_name }}" "$WORK/$OUT" --clobber -R "${{ github.repository }}"
+          # also keep the standalone helper + read me as assets
           gh release upload "${{ github.ref_name }}" \
             "dmg-extras/Open RoboStore Studio.command" "dmg-extras/Read Me.txt" \
-            --clobber -R "${{ github.repository }}"
+            --clobber -R "${{ github.repository }}" || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
