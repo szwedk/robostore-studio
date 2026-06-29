@@ -12,6 +12,24 @@ the box with each hand.
 
 ---
 
+## ⬇️ Download & install (macOS)
+
+Get the latest `.dmg` from **[Releases](https://github.com/szwedk/robostore-studio/releases/latest)**
+(Apple Silicon = `_aarch64`, Intel = `_x64`).
+
+1. Open the `.dmg` and **drag RoboStore Studio onto the Applications folder**.
+2. First launch: **right-click the app → Open** (it's not signed yet).
+3. **If macOS says "RoboStore Studio is damaged"**, open **Terminal** and run this once, then open the app again:
+
+   ```sh
+   xattr -cr "/Applications/RoboStore Studio.app"
+   ```
+
+> Steps 2–3 are a one-time macOS requirement for unsigned apps. They go away once the app is code-signed + notarized (Apple Developer account).
+> **Linux:** download the `.AppImage` (`chmod +x` it) or install the `.deb`.
+
+---
+
 ## Architecture
 
 ```
