@@ -111,22 +111,30 @@ jobs:
       # Repackage the macOS .dmg with appdmg so the first-run helper + Read Me sit
       # at fixed, tidy positions (Tauri can't position extra DMG icons). appdmg
       # writes the .DS_Store deterministically — no flaky Finder scripting.
-      # Best-effort: if it fails, Tauri's clean app→Applications .dmg ships instead.
+      #
+      # IMPORTANT: we source the app by MOUNTING the .dmg Tauri just built, not by
+      # finding the .app in the target dir — Tauri's updater bundler deletes
+      # ("Cleans") bundle/macos/*.app immediately after it builds the dmg, so the
+      # .app is gone by the time this step runs. The .dmg is the only guaranteed
+      # artifact, and `ditto` from it preserves the ad-hoc code signature.
+      # Best-effort: if anything fails, Tauri's clean app→Applications .dmg ships.
       - name: Repackage DMG with helper files (appdmg)
         if: startsWith(matrix.os, 'macos') && github.ref_type == 'tag'
         continue-on-error: true
         run: |
           npm i -g appdmg
-          # Search the whole tree (target dir location varies) for the bundled app.
-          APP=$(find . -type d -path "*/release/bundle/macos/*.app" -not -path "*/node_modules/*" 2>/dev/null | head -1)
-          if [ -z "$APP" ]; then
-            echo "no .app found, skipping. dmg/macos dirs present:"
+          SRC_DMG=$(find . -path "*/release/bundle/dmg/*.dmg" -not -path "*/node_modules/*" 2>/dev/null | head -1)
+          if [ -z "$SRC_DMG" ]; then
+            echo "no source dmg found, skipping. bundle tree:"
             find . -path "*/release/bundle/*" -not -path "*/node_modules/*" -maxdepth 8 2>/dev/null | head -20
             exit 0
           fi
-          echo "found app: $APP"
+          echo "source dmg: $SRC_DMG"
           WORK=$(mktemp -d)
-          cp -R "$APP" "$WORK/"
+          MP=$(hdiutil attach -nobrowse -noverify -noautoopen "$SRC_DMG" | grep -o '/Volumes/.*' | head -1)
+          echo "mounted at: $MP"
+          ditto "$MP/RoboStore Studio.app" "$WORK/RoboStore Studio.app"
+          hdiutil detach "$MP" >/dev/null || true
           cp "dmg-extras/Open RoboStore Studio.command" "$WORK/"
           cp "dmg-extras/Read Me.txt" "$WORK/"
           cp "dmg-extras/dmg-background.png" "$WORK/background.png"
@@ -135,6 +143,10 @@ jobs:
           ARCH=$([ "${{ matrix.triple }}" = "aarch64-apple-darwin" ] && echo aarch64 || echo x64)
           OUT="RoboStore Studio_${VER}_${ARCH}.dmg"
           ( cd "$WORK" && appdmg spec.json "$OUT" )
+          # sanity-check the repackaged dmg actually contains the helper files
+          CHK=$(hdiutil attach -nobrowse -noverify -noautoopen "$WORK/$OUT" | grep -o '/Volumes/.*' | head -1)
+          ls -la "$CHK"
+          hdiutil detach "$CHK" >/dev/null || true
           gh release upload "${{ github.ref_name }}" "$WORK/$OUT" --clobber -R "${{ github.repository }}"
           # also keep the standalone helper + read me as assets
           gh release upload "${{ github.ref_name }}" \
